@@ -23,4 +23,12 @@ const App = () => {
   );
 };
 
+function App() {
+    return (
+      <div className="App">
+        <h1>Welcome to MERN Auth App</h1>
+      </div>
+    );
+  }
+
 export default App;
