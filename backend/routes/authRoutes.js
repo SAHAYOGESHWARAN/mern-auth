@@ -1,9 +1,11 @@
-// routes/auth.js
+
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
+const { registerUser } = require('../controllers/authController');
+
 
 // Configure nodemailer transporter
 const transporter = nodemailer.createTransport({
@@ -41,5 +43,9 @@ router.post('/password-recovery', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
+// POST route for user registration
+router.post('/register', registerUser);
+
 
 module.exports = router;

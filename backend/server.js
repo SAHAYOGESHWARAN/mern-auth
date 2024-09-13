@@ -4,6 +4,8 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const authRoutes = require('./routes/authRoutes');
 
+
+
 // Load environment variables
 dotenv.config();
 
@@ -23,6 +25,9 @@ mongoose.connect(process.env.MONGO_URI, {
 }).catch((err) => {
   console.error(err);
 });
+
+// Use routes
+app.use('/api/auth', authRoutes);
 
 // Routes
 app.use('/api/auth', authRoutes);

@@ -101,3 +101,28 @@ exports.resetPassword = async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 };
+
+
+const User = require('../models/User');
+const { sendVerificationEmail } = require('../config/email'); // Ensure this function is properly defined
+
+const registerUser = async (req, res) => {
+  const { email, password, username, mobileNo } = req.body;
+
+  try {
+    // Create a new user
+    const newUser = new User({ email, password, username, mobileNo });
+
+    // Save the user and send verification email
+    await newUser.save();
+    await sendVerificationEmail(email); // Implement this function to send OTP
+
+    res.status(200).json({ message: 'Registration successful! Please check your email for verification.' });
+  } catch (error) {
+    res.status(500).json({ message: 'Registration failed. Please try again.' });
+  }
+};
+
+module.exports = {
+  registerUser,
+};
