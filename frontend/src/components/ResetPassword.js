@@ -1,62 +1,49 @@
-import React, { useState, useEffect } from 'react';
+// ResetPassword.js
+import React, { useState } from 'react';
 import axios from 'axios';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 const ResetPassword = () => {
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const { token } = useParams();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!token) {
-      setError('Invalid or missing reset token.');
-    }
-  }, [token]);
+  const [otp, setOtp] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
-    setSuccess('');
-
-    // Basic validation
-    if (!password) {
-      setError('Password is required');
-      setLoading(false);
-      return;
-    }
+    setMessage('');
 
     try {
-      await axios.post('/api/auth/reset-password', { token, password });
-      setSuccess('Password reset successful! You will be redirected to login.');
-      setTimeout(() => navigate('/login'), 3000); // Redirect after 3 seconds
+      await axios.post('/api/auth/reset-password', { token, otp, newPassword });
+      setMessage('Password reset successfully. You can now log in.');
     } catch (error) {
-      console.error('Error resetting password', error);
       setError('Failed to reset password. Please try again.');
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
     <div>
-      <h2>Reset Password</h2>
+      <h1>Reset Password</h1>
       <form onSubmit={handleSubmit}>
         {error && <p style={{ color: 'red' }}>{error}</p>}
-        {success && <p style={{ color: 'green' }}>{success}</p>}
+        {message && <p style={{ color: 'green' }}>{message}</p>}
         <input
-          type="password"
-          placeholder="New Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          type="text"
+          placeholder="Enter OTP"
+          value={otp}
+          onChange={(e) => setOtp(e.target.value)}
           required
         />
-        <button type="submit" disabled={loading}>
-          {loading ? 'Resetting...' : 'Reset Password'}
-        </button>
+        <input
+          type="password"
+          placeholder="Enter new password"
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+          required
+        />
+        <button type="submit">Reset Password</button>
       </form>
     </div>
   );

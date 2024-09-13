@@ -9,26 +9,17 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Handle form submission
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError(''); // Clear previous errors
-
-    // Basic validation
-    if (!email || !password) {
-      setError('Both fields are required');
-      setLoading(false);
-      return;
-    }
+    setError('');
 
     try {
       const { data } = await axios.post('/api/auth/login', { email, password });
-      localStorage.setItem('authToken', data.token); // Store JWT token in localStorage
-      navigate('/dashboard'); // Redirect to dashboard after successful login
+      localStorage.setItem('authToken', data.token);
+      navigate('/dashboard');
     } catch (error) {
-      console.error('Error logging in', error);
-      setError('Invalid email or password'); // Display error message to user
+      setError('Invalid email or password');
     } finally {
       setLoading(false);
     }
@@ -39,27 +30,27 @@ const Login = () => {
       <h1>Login</h1>
       <form onSubmit={handleLogin}>
         {error && <p style={{ color: 'red' }}>{error}</p>}
-        <input 
-          type="email" 
-          value={email} 
-          onChange={(e) => setEmail(e.target.value)} 
-          placeholder="Email" 
-          required 
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
         />
-        <input 
-          type="password" 
-          value={password} 
-          onChange={(e) => setPassword(e.target.value)} 
-          placeholder="Password" 
-          required 
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
         />
         <button type="submit" disabled={loading}>
           {loading ? 'Logging in...' : 'Login'}
         </button>
       </form>
-      <p>
-        Don't have an account? <a href="/register">Register</a>
-      </p>
+      <div>
+        <a href="/password-recovery">Forgot your password?</a>
+      </div>
     </div>
   );
 };

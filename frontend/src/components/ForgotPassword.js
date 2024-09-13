@@ -1,7 +1,8 @@
+
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const PasswordRecovery = () => {
+const ForgotPassword = () => {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -13,15 +14,15 @@ const PasswordRecovery = () => {
 
     try {
       await axios.post('/api/auth/password-recovery', { email });
-      setMessage('Password recovery email sent! Please check your inbox.');
+      setMessage('OTP sent to your email. Please check your inbox.');
     } catch (error) {
-      setError('Failed to send recovery email. Please try again.');
+      setError('Failed to send OTP. Please try again.');
     }
   };
 
   return (
     <div>
-      <h1>Password Recovery</h1>
+      <h1>Forgot Password</h1>
       <form onSubmit={handleSubmit}>
         {error && <p style={{ color: 'red' }}>{error}</p>}
         {message && <p style={{ color: 'green' }}>{message}</p>}
@@ -32,10 +33,10 @@ const PasswordRecovery = () => {
           onChange={(e) => setEmail(e.target.value)}
           required
         />
-        <button type="submit">Send Recovery Email</button>
+        <button type="submit">Send OTP</button>
       </form>
     </div>
   );
 };
 
-export default PasswordRecovery;
+export default ForgotPassword;

@@ -1,80 +1,42 @@
+// routes/auth.js
 const express = require('express');
 const router = express.Router();
-const { protect } = require('../middleware/authMiddleware');
 const User = require('../models/User');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
+const crypto = require('crypto');
 
-// @route POST /api/auth/register
-// @desc Register new user
-// @access Public
-router.post('/register', async (req, res) => {
-  const { name, email, password } = req.body;
-
-  try {
-    const userExists = await User.findOne({ email });
-
-    if (userExists) {
-      return res.status(400).json({ message: 'User already exists' });
-    }
-
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    const user = await User.create({
-      name,
-      email,
-      password: hashedPassword,
-    });
-
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '30d',
-    });
-
-    res.status(201).json({ token });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
+// Configure nodemailer transporter
+const transporter = nodemailer.createTransport({
+  service: 'Gmail',
+  auth: {
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_PASS
   }
 });
 
-// @route POST /api/auth/login
-// @desc Authenticate user and get token
-// @access Public
-router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
+// Generate and send OTP
+router.post('/password-recovery', async (req, res) => {
+  const { email } = req.body;
 
   try {
     const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: 'User not found' });
 
-    if (!user) {
-      return res.status(400).json({ message: 'Invalid credentials' });
-    }
+    const otp = crypto.randomInt(100000, 999999); // Generate a 6-digit OTP
+    user.resetPasswordToken = otp;
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    await user.save();
 
-    if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid credentials' });
-    }
+    const mailOptions = {
+      from: process.env.GMAIL_USER,
+      to: email,
+      subject: 'Password Reset OTP',
+      text: `Your OTP is ${otp}. It expires in 1 hour.`
+    };
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '30d',
-    });
-
-    res.json({ token });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-// @route GET /api/auth/user
-// @desc Get logged in user details
-// @access Private
-router.get('/user', protect, async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id).select('-password');
-    res.json(user);
+    await transporter.sendMail(mailOptions);
+    res.status(200).json({ message: 'OTP sent to your email' });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }
