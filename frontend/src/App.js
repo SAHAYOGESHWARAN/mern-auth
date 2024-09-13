@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import Login from './components/Login';
 import Register from './components/Register';
 import EmailVerification from './components/EmailVerification';
@@ -11,24 +11,29 @@ import ProtectedRoute from './components/ProtectedRoute';
 const App = () => {
   return (
     <Router>
-      <Switch>
-        <Route path="/login" component={Login} />
-        <Route path="/register" component={Register} />
-        <Route path="/verify-email/:token" component={EmailVerification} />
-        <Route path="/password-recovery" component={PasswordRecovery} />
-        <Route path="/reset-password/:token" component={ResetPassword} />
-        <ProtectedRoute path="/dashboard" component={Dashboard} />
-      </Switch>
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/verify-email/:token" element={<EmailVerification />} />
+        <Route path="/password-recovery" element={<PasswordRecovery />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
+
+        {/* Protected Route */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Default Route */}
+        <Route path="/" element={<Navigate to="/login" />} />
+      </Routes>
     </Router>
   );
 };
-
-function App() {
-    return (
-      <div className="App">
-        <h1>Welcome to MERN Auth App</h1>
-      </div>
-    );
-  }
 
 export default App;
